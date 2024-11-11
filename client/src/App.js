@@ -3,7 +3,7 @@ import Auth from "./pages/Auth";
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
-
+import ProtectedRoute from "./components/ProtectRoute";
 
 function App() {
   return (
@@ -11,7 +11,6 @@ function App() {
       <Route path="/auth" element={<Auth />} />
       <Route path="/" element={<Home />} />
       <Route path="/profile" element={<Profile />} />
-      
     </Routes>
   );
 }

@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Box, TextField, Button, Typography, Tab, Tabs } from "@mui/material";
+import { loginUser, signup } from "../store/UserSlice";
+import { useNavigate } from "react-router-dom";
 const initialData = {
   email: "",
   password: "",
   username: "",
 };
 const Auth = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading, error, user } = useSelector((state) => state.user);
   const [tab, setTab] = useState(0);
   const [data, setData] = useState(initialData);
 
@@ -20,14 +26,46 @@ const Auth = () => {
 
   const handleLogin = () => {
     console.log("login", data);
+    dispatch(loginUser(data)).then((res) => {
+      console.log(res);
+      if (res.payload) {
+        console.log(res.payload);
+        setData(initialData);
+        const userData = {
+          token: res.payload.token,
+          _id: res.payload._id,
+        };
+        console.log(userData);
+        localStorage.setItem("token", JSON.stringify(userData));
+        navigate("/");
+      }
+    });
   };
   const handleSignup = () => {
     console.log("singup", data);
+    dispatch(signup(data)).then((res) => {
+      if (res.payload) {
+        setData(initialData);
+        const userData = {
+          token: res.payload.token,
+          _id: res.payload._id,
+        };
+        console.log(userData);
+        localStorage.setItem("token", JSON.stringify(userData));
+        navigate("/");
+      }
+    });
   };
 
   useEffect(() => {
     setData(initialData);
   }, [tab]);
+
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   return (
     <Box sx={{ maxWidth: 400, margin: "auto", padding: 4 }}>
@@ -81,6 +119,7 @@ const Auth = () => {
           variant="contained"
           color="primary"
           fullWidth
+          disabled={loading}
           sx={{ mt: 2 }}
           onClick={tab === 1 ? handleSignup : handleLogin}
         >
