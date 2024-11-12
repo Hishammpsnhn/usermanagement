@@ -9,7 +9,6 @@ const generateToken = (user) => {
       email: user.email, 
       isAdmin: user.isAdmin,
       username: user.username, 
-      pic: user.pic, 
     },
     process.env.SECRET,
     {

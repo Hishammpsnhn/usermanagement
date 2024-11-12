@@ -22,20 +22,36 @@ export const signup = createAsyncThunk(
   async (userCredential) => {
     const req = await axios.post(
       "http://localhost:4000/api/auth/signup",
-      userCredential
+      userCredential,{
+        withCredentials:true
+      }
     );
-    const res = await req.data.data;
+    console.log(req)
+    const res = await req.data;
     return res;
   }
 );
+export const fetchUser = createAsyncThunk("user/fetchUser", async () => {
+  try {
+    const res = await axios.get("http://localhost:4000/api/user", {
+      withCredentials: true,
+    });
+    return res.data;
+  } catch (error) {
+    console.log(error)
+  }
+});
 
 const userSlice = createSlice({
   name: "user",
   initialState: {
     loading: false,
     error: null,
-    user: localStorage.getItem("token") || null,
+    user: null,
+    isAuthenticated:
+      localStorage.getItem("isAuthenticated") === "true" || false,
   },
+
   extraReducers: (builder) => {
     builder
       .addCase(loginUser.pending, (state) => {
@@ -45,7 +61,7 @@ const userSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = { id: action.payload._id, token: action.payload.token };
+        state.user = action.payload
         state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -67,7 +83,8 @@ const userSlice = createSlice({
       })
       .addCase(signup.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = { id: action.payload._id, token: action.payload.token };
+        state.user = action.payload
+
         state.error = null;
       })
       .addCase(signup.rejected, (state, action) => {
@@ -79,6 +96,22 @@ const userSlice = createSlice({
           state.error = action.error.message;
         }
         console.log(action.error);
+      })
+
+      //fetchuser
+      .addCase(fetchUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.isAuthenticated = true;
+      })
+      .addCase(fetchUser.rejected, (state, action) => {
+        state.loading = false;
+        state.user = null;
+        state.isAuthenticated = false;
+        state.error = action.payload || "Session expired";
       });
   },
 });

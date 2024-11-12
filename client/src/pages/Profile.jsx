@@ -14,10 +14,15 @@ import {
   AccountCircle,
 } from "@mui/icons-material";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 
 const Profile = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [selectedImage, setSelectedImage] = useState(null);
   const [userDetail, setUserDetail] = useState(null);
+  const { user } = useSelector((state) => state.user);
 
   const handleImageChange = (event) => {
     if (event.target.files && event.target.files[0]) {
@@ -25,21 +30,35 @@ const Profile = () => {
       console.log(URL.createObjectURL(event.target.files[0]));
     }
   };
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axios.get("http://localhost:4000/api/user", {
-          withCredentials: true,
-        });
-        setUserDetail(response.data);
-        console.log(response);
-      } catch (error) {
-        console.error("Error :", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchUserData = async () => {
+  //     try {
+  //       const response = await axios.get("http://localhost:4000/api/user", {
+  //         withCredentials: true,
+  //       });
+  //       setUserDetail(response.data);
+  //       console.log(response);
+  //     } catch (error) {
+  //       console.error("Error :", error.response.data);
+  //       if (error.response.data === "Invalid Token" || "Token require")
+  //         //dispatch(logoutUser());
 
-    fetchUserData();
+  //       navigate("/auth");
+  //     }
+  //   };
+
+  //   if (user) fetchUserData();
+  // }, []);
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
   }, []);
+  if (!user || user?.isAdmin) {
+    return <></>;
+  }
 
   return (
     <Box sx={{ maxWidth: 600, margin: "auto", padding: 4 }}>
